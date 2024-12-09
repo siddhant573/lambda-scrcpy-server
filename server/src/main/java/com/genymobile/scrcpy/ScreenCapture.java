@@ -65,6 +65,13 @@ public class ScreenCapture extends SurfaceCapture implements Device.RotationList
                 Ln.d("Display: using SurfaceControl API");
             }
         } catch (Exception surfaceControlException) {
+            try{
+            display = createDisplay();
+            setDisplaySurface(display, surface, videoRotation, contentRect, unlockedVideoRect, layerStack);
+            Ln.d("Display: using SurfaceControl API");
+            }catch (Exception displayManagerException){
+                Ln.e("LAMBDA_SCRCPY_LOG: Could not create surface display using DisplayManager API");
+            }
             throw new AssertionError("LAMBDA_SCRCPY_LOG: Could not create surface display");
         }
     }
