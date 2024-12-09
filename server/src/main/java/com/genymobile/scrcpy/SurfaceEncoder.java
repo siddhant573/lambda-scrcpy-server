@@ -29,6 +29,7 @@ public class SurfaceEncoder implements AsyncProcessor {
     private final int videoBitRate;
     private final int maxFps;
     private final boolean downsizeOnError;
+    private int osversion;
 
     private boolean firstFrameSent;
     private int consecutiveErrors;
@@ -37,7 +38,7 @@ public class SurfaceEncoder implements AsyncProcessor {
     private final AtomicBoolean stopped = new AtomicBoolean();
 
     public SurfaceEncoder(SurfaceCapture capture, Streamer streamer, int videoBitRate, int maxFps, List<CodecOption> codecOptions, String encoderName,
-            boolean downsizeOnError) {
+            boolean downsizeOnError, int osversion) {
         this.capture = capture;
         this.streamer = streamer;
         this.videoBitRate = videoBitRate;
@@ -45,6 +46,7 @@ public class SurfaceEncoder implements AsyncProcessor {
         this.codecOptions = codecOptions;
         this.encoderName = encoderName;
         this.downsizeOnError = downsizeOnError;
+        this.osversion = osversion;
     }
 
     private void streamScreen() throws IOException, ConfigurationException {
@@ -69,6 +71,8 @@ public class SurfaceEncoder implements AsyncProcessor {
                     mediaCodec.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
                     surface = mediaCodec.createInputSurface();
 
+                    // set osversion for capturer
+                    capture.setOsVersion(osversion);
                     capture.start(surface);
 
                     mediaCodec.start();

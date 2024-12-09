@@ -13,6 +13,7 @@ import java.util.Map;
 
 public class Options {
 
+    private int osVersion;
     private Ln.Level logLevel = Ln.Level.DEBUG;
     private int scid = -1; // 31-bit non-negative value, or -1
     private boolean video = true;
@@ -59,6 +60,10 @@ public class Options {
     private boolean sendFrameMeta = true; // send PTS so that the client may record properly
     private boolean sendDummyByte = true; // write a byte on start to detect connection issues
     private boolean sendCodecMeta = true; // write the codec metadata before the stream
+
+    public int getOsVersion(){
+        return osVersion;
+    }
 
     public Ln.Level getLogLevel() {
         return logLevel;
@@ -474,6 +479,10 @@ public class Options {
                     options.sendDummyByte = false;
                     options.sendCodecMeta = false;
                 }
+                break;
+            case "os_version":
+                options.osVersion = Integer.parseInt(value);
+                Ln.d("LAMBDA_SCRCPY_LOG: OS Version: " + options.osVersion);
                 break;
             default:
                 Ln.w("Unknown server option: " + key);

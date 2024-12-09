@@ -68,4 +68,9 @@ public abstract class SurfaceCapture {
     public boolean isClosed() {
         return false;
     }
+    /*
+     * Return the current device os version
+     * 
+     */
+    public void setOsVersion(int value){}
 }
