@@ -66,9 +66,17 @@ public class ScreenCapture extends SurfaceCapture implements Device.RotationList
             }
         } catch (Exception surfaceControlException) {
             try{
-            display = createDisplay();
-            setDisplaySurface(display, surface, videoRotation, contentRect, unlockedVideoRect, layerStack);
-            Ln.d("Display: using SurfaceControl API");
+                if (osversion < 14) {
+                    // create virtual display
+                    Rect videoRect = screenInfo.getVideoSize().toRect();
+                    virtualDisplay = ServiceManager.getDisplayManager()
+                            .createVirtualDisplay("scrcpy", videoRect.width(), videoRect.height(), device.getDisplayId(), surface);
+                    Ln.d("Display: using virtual DisplayManager API");
+                } else {
+                    display = createDisplay();
+                    setDisplaySurface(display, surface, videoRotation, contentRect, unlockedVideoRect, layerStack);
+                    Ln.d("Display: using SurfaceControl API");
+                }
             }catch (Exception displayManagerException){
                 Ln.e("LAMBDA_SCRCPY_LOG: Could not create surface display using DisplayManager API");
             }
