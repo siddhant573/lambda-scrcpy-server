@@ -1,5 +1,6 @@
 package com.genymobile.scrcpy;
 
+
 import com.genymobile.scrcpy.wrappers.ServiceManager;
 import com.genymobile.scrcpy.wrappers.SurfaceControl;
 
@@ -9,14 +10,20 @@ import android.os.Build;
 import android.os.IBinder;
 import android.view.Surface;
 
+
 public class ScreenCapture extends SurfaceCapture implements Device.RotationListener, Device.FoldListener {
 
     private final Device device;
+    private int osversion; 
     private IBinder display;
     private VirtualDisplay virtualDisplay;
 
     public ScreenCapture(Device device) {
         this.device = device;
+    }
+
+    public void setOsVersion(int osversion) {
+        this.osversion = osversion;
     }
 
     @Override
@@ -45,20 +52,35 @@ public class ScreenCapture extends SurfaceCapture implements Device.RotationList
         }
 
         try {
-            display = createDisplay();
-            setDisplaySurface(display, surface, videoRotation, contentRect, unlockedVideoRect, layerStack);
-            Ln.d("Display: using SurfaceControl API");
-        } catch (Exception surfaceControlException) {
-            Rect videoRect = screenInfo.getVideoSize().toRect();
-            try {
+            Ln.d("LAMBDA_SCRCPY_LOG: Display created for os: " + osversion);
+            if (osversion >= 14) {
+                // create virtual display
+                Rect videoRect = screenInfo.getVideoSize().toRect();
                 virtualDisplay = ServiceManager.getDisplayManager()
                         .createVirtualDisplay("scrcpy", videoRect.width(), videoRect.height(), device.getDisplayId(), surface);
-                Ln.d("Display: using DisplayManager API");
-            } catch (Exception displayManagerException) {
-                Ln.e("Could not create display using SurfaceControl", surfaceControlException);
-                Ln.e("Could not create display using DisplayManager", displayManagerException);
-                throw new AssertionError("Could not create display");
+                Ln.d("Display: using virtual DisplayManager API");
+            } else {
+                display = createDisplay();
+                setDisplaySurface(display, surface, videoRotation, contentRect, unlockedVideoRect, layerStack);
+                Ln.d("Display: using SurfaceControl API");
             }
+        } catch (Exception surfaceControlException) {
+            try{
+                if (osversion < 14) {
+                    // create virtual display
+                    Rect videoRect = screenInfo.getVideoSize().toRect();
+                    virtualDisplay = ServiceManager.getDisplayManager()
+                            .createVirtualDisplay("scrcpy", videoRect.width(), videoRect.height(), device.getDisplayId(), surface);
+                    Ln.d("Display: using virtual DisplayManager API");
+                } else {
+                    display = createDisplay();
+                    setDisplaySurface(display, surface, videoRotation, contentRect, unlockedVideoRect, layerStack);
+                    Ln.d("Display: using SurfaceControl API");
+                }
+            }catch (Exception displayManagerException){
+                Ln.e("LAMBDA_SCRCPY_LOG: Could not create surface display using DisplayManager API");
+            }
+            throw new AssertionError("LAMBDA_SCRCPY_LOG: Could not create surface display");
         }
     }
 

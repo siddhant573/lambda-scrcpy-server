@@ -165,7 +165,7 @@ public final class Server {
                             options.getMaxSize(), options.getCameraAspectRatio(), options.getCameraFps(), options.getCameraHighSpeed());
                 }
                 SurfaceEncoder surfaceEncoder = new SurfaceEncoder(surfaceCapture, videoStreamer, options.getVideoBitRate(), options.getMaxFps(),
-                        options.getVideoCodecOptions(), options.getVideoEncoder(), options.getDownsizeOnError());
+                        options.getVideoCodecOptions(), options.getVideoEncoder(), options.getDownsizeOnError(), options.getOsVersion());
                 asyncProcessors.add(surfaceEncoder);
             }
 
